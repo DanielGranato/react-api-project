@@ -7,6 +7,8 @@ export const Feed = () => {
 
     useEffect(() => {
         fetch('http://localhost:3000/blog-posts')
+        .then(response => response.json())
+        .then(data => setPosts(data))
     }, [])
 
     return (
