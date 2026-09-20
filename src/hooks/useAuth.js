@@ -42,17 +42,28 @@ export const useAuth = () => {
     }
   }
 
-  const login = (email, password) => {
+  const login = async (email, password) => {
+
     try {
-      const users = JSON.parse(localStorage.getItem('auth_users') || '[]')
-      const user = users.find(u => u.email === email && u.password === password)
-      
-      if (!user) {
-        throw new Error('Email ou senha incorretos')
+      const response = await fetch('http://localhost:3000/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          email,
+          password
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error('HTTP Error: ', response.status)
       }
 
-      setUser(user)
-      localStorage.setItem('auth_user', JSON.stringify(user))
+      const data = await response.json()
+      setUser(data.user)
+      localStorage.setItem('auth_user', JSON.stringify(data.user))
+      localStorage.setItem('access_token', data.access_token)
       
       return { success: true, user }
     } catch (error) {
@@ -63,6 +74,7 @@ export const useAuth = () => {
   const logout = () => {
     setUser(null)
     localStorage.removeItem('auth_user')
+    localStorage.removeItem('access_token')
   }
 
   const isAuthenticated = !!user
