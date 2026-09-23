@@ -1,14 +1,14 @@
+import { useEffect, useState } from "react"
 import { CardPost } from "../../components/CardPost"
 import styles from './feed.module.css'
-import { useState, useEffect } from 'react'
+import { http } from "../../api";
 
 export const Feed = () => {
-    const [posts, setPosts] = useState([])
+    const [posts, setPosts] = useState([]);
 
     useEffect(() => {
-        fetch('http://localhost:3000/blog-posts')
-        .then(response => response.json())
-        .then(data => setPosts(data))
+        http.get('blog-posts')
+            .then(reponse => setPosts(reponse.data))
     }, [])
 
     return (

@@ -5,26 +5,32 @@ import { ThumbsUpButton } from "./ThumbsUpButton"
 import { ModalComment } from "../ModalComment"
 import { Link } from "react-router"
 import { useState } from 'react'
+import { http } from '../../api'
+import { useAuth } from '../../hooks/useAuth'
 
 export const CardPost = ({ post }) => {
 
     const [likes, setLikes] = useState(post.likes)
+    const [comments, setComments] = useState(post.comments)
+
+    const { isAuthenticated } = useAuth()
+
+    const handleNewComment = (comment) => {
+        setComments([comment, ...comments])
+    }
 
     const handleLikeButton = () => {
 
         const token = localStorage.getItem('access_token')
 
-        fetch(`http://localhost:3000/blog-posts/${post.id}/like`, {
-            method: 'POST',
+        http.post(`blog-posts/${post.id}/like`, {}, {
             headers: {
                 Authorization: `Bearer ${token}`
             }
         })
-            .then(response => {
-                if (response.ok) {
-                    setLikes(oldState => oldState + 1)
-                    console.log('incrementar like')
-                }
+            .then(() => {
+                setLikes(oldState => oldState + 1)
+                console.log('incrementar like')
             })
     }
 
@@ -46,15 +52,15 @@ export const CardPost = ({ post }) => {
             <footer className={styles.footer}>
                 <div className={styles.actions}>
                     <div className={styles.action}>
-                        <ThumbsUpButton loading={false} onClick={handleLikeButton} />
+                        <ThumbsUpButton loading={false} onClick={handleLikeButton} disabled={!isAuthenticated}/>
                         <p>
                             {likes}
                         </p>
                     </div>
                     <div className={styles.action}>
-                        <ModalComment />
+                        <ModalComment onSuccess={handleNewComment} postId={post.id}/>
                         <p>
-                            {post.comments.length}
+                            {comments.length}
                         </p>
                     </div>
                 </div>
